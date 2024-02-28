@@ -1,3 +1,5 @@
+<!-- resources/views/index.blade.php -->
+
 @extends('appp')
 
 @section('content')
@@ -29,13 +31,13 @@
 
     <form action="{{ route('products.index') }}" method="GET">
         <div class="row mt-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="form-group">
                     <label for="product_name">商品名検索:</label>
                     <input type="text" class="form-control" name="product_name" value="{{ request('product_name') }}">
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="form-group">
                     <label for="company_id">メーカー名検索:</label>
                     <select class="form-control" name="company_id">
@@ -48,6 +50,30 @@
                     </select>
                 </div>
             </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="min_price">価格(下限):</label>
+                    <input type="text" class="form-control" name="min_price" value="{{ request('min_price') }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="max_price">価格(上限):</label>
+                    <input type="text" class="form-control" name="max_price" value="{{ request('max_price') }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="min_stock">在庫数(下限):</label>
+                    <input type="text" class="form-control" name="min_stock" value="{{ request('min_stock') }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="max_stock">在庫数(上限):</label>
+                    <input type="text" class="form-control" name="max_stock" value="{{ request('max_stock') }}">
+                </div>
+            </div>
         </div>
         
         <button type="submit" class="btn btn-primary mt-3">検索</button>
@@ -56,19 +82,19 @@
     <table class="table table-bordered mt-4 text-center">
         <thead>
             <tr>
-                <th>No</th>
+                <th scope="col">@sortablelink('id', 'No')</th>
                 <th>商品画像</th>
-                <th>商品名</th>
-                <th>価格</th>
-                <th>メーカー名</th>
-                <th>在庫数</th>
+                <th scope="col">@sortablelink('product_name', '商品名')</th>
+                <th scope="col">@sortablelink('price', '価格')</th>
+                <th scope="col">@sortablelink('company_id', 'メーカー名')</th>
+                <th scope="col">@sortablelink('stock','在庫数')</th>
                 <th>詳細確認</th>
                 <th>削除注意</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($products as $product)
-                <tr>
+                <tr id="product-row-{{ $product->id }}">
                     <td>{{ $product->id }}</td>
                     <td>
                         <div class="col-md-10">
@@ -79,18 +105,18 @@
                             @endif
                         </div>
                     </td>
-                    <td>{{ $product->product_name }}</td>
+                    <td scope="row">{{ $product->product_name }}</td>
                     <td>{{ $product->price }}円</td>
                     <td>{{ $product->company->company_name }}</td>
                     <td>{{ $product->stock }}</td>
                     <td>
-                        <a class="btn btn-primary" href="{{ route('products.show', $product->id) }}?page_id={{ $page_id }}">詳細</a>
+                        <a href="{{ route('products.show', $product->id) }}?page_id={{ $page_id }}" class="btn btn-primary">詳細</a>
                     </td>
                     <td>
-                        <form action="{{ route('products.destroy',$product->id) }}" method="POST">
+                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="delete-form">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger" onclick='return confirm("削除しますか？");'>削除</button>
+                            <button type="submit" class="btn btn-danger delete-btn" onclick="return confirm('削除しますか？');">削除</button>
                         </form>
                     </td>
                 </tr>

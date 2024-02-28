@@ -9,29 +9,46 @@ use Illuminate\Http\Request;
 use App\Http\Requests\ArticleRequest;
 use Illuminate\Support\Facades\Storage;
 
+
 class ProductController extends Controller
 {
     public function index(Request $request)
 {
     try {
-        $query = Product::query();
+        $query = Product::sortable();
 
-        
+        // 検索条件の追加
         if ($request->filled('product_name')) {
             $query->where('product_name', 'like', '%' . $request->input('product_name') . '%');
         }
-
-        
         if ($request->filled('company_id')) {
             $query->where('company_id', $request->input('company_id'));
         }
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->input('min_price'));
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->input('max_price'));
+        }
+        if ($request->filled('min_stock')) {
+            $query->where('stock', '>=', $request->input('min_stock'));
+        }
+        if ($request->filled('max_stock')) {
+            $query->where('stock', '<=', $request->input('max_stock'));
+        }
 
-       
-        $query->orderBy('id');
+        // ソートのデフォルト値を設定
+        $sortBy = $request->input('sort_by', 'id'); // デフォルトは'id'
+        $sortDirection = $request->input('sort_direction', 'desc'); // デフォルトは'desc'
 
-        $products = $query->paginate(5);
+        // ソートを適用
+        $query->orderBy($sortBy, $sortDirection);
 
-     
+        // ページネーション
+        $products = $query->sortable(['id'])->paginate(5);
+
+
+        // メーカー情報の取得
         $companies = Company::all();
 
         return view('index', compact('products', 'companies'))
@@ -41,6 +58,7 @@ class ProductController extends Controller
         return redirect()->back()->with('error', 'データの取得に失敗しました。');
     }
 }
+
     public function create()
     {
         try {
