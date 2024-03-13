@@ -1,42 +1,50 @@
-@section('scripts')
+<!-- resources/views/scripts.blade.php -->
+
 <script>
-$(document).ready(function() {
-    // ソート可能なテーブルのヘッダーをクリックしたときの処理
-    $('.sortable-table th.sortable').off('click').on('click', function() {
-        var column = $(this).index(); // クリックされた列のインデックスを取得
-        var sortOrder = $(this).data('sort-order') || 'asc'; // ソート順を取得（デフォルトは昇順）
-       
-        // ソート順を切り替える
-        sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-        $(this).data('sort-order', sortOrder);
-    
-        // すべての列からソートのクラスを削除し、クリックされた列にソートのクラスを追加
-        $('.sortable-table th').removeClass('sorted');
-        $(this).addClass('sorted');
-      
-        // ソートの方向に応じて矢印を表示
-        $('.sortable-table th i').removeClass().addClass('fa fa-sort');
-        $(this).find('i').removeClass().addClass(sortOrder === 'asc' ? 'fa fa-sort-up' : 'fa fa-sort-down');
-  
-        //Ajaxリクエストを作成して、ソートされたデータを取得
+    // 検索フォームの非同期処理
+    $(document).ready(function() {
+        $('form#search-form').on('submit', function(e) {
+            e.preventDefault(); // デフォルトのsubmitをキャンセル
+
+            var formData = $(this).serialize(); // フォームデータを取得
+
+            // Ajaxリクエストを送信
+            $.ajax({
+                url: '{{ route('products.index') }}',
+                method: 'GET',
+                data: formData,
+                success: function(response) {
+                    $('#products-table').html(response);
+                    console.log('ソートが完了しました'); 
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                    console.log('ソートできません');
+                }
+            });
+        });
+    });
+
+    // 商品の削除処理の非同期処理
+    $(document).on('click', '.delete-btn', function(e) {
+        e.preventDefault();
+
+        var url = $(this).attr('href');
+
+        // Ajaxリクエストを送信
         $.ajax({
-            url: '{{ route("products.index") }}',
-            type: 'GET',
-            data: {
-                column: column,
-                sort_order: sortOrder
-            },
+            url: url,
+            method: 'DELETE',
             success: function(response) {
-                // 成功時の処理: 商品リストを更新
-                console.log(response)
-                $('.table tbody').html(response);
+                $('#product-row-' + response.deletedProductId).remove(); // 削除された商品の行を削除
+                alert('削除が完了しました');
             },
             error: function(xhr, status, error) {
-                // エラー時の処理
-                console.error('Request failed. Status: ' + status + ', Error: ' + error);
+                console.error(xhr.responseText);
+                alert('削除に失敗しました');
             }
         });
     });
-});
+
+    
 </script>
-@endsection

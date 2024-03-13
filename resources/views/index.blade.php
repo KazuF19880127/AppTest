@@ -126,3 +126,7 @@
 
     {!! $products->links('pagination::bootstrap-5') !!}
 @endsection
+
+@section('scripts')
+    @include('scripts')
+@endsection

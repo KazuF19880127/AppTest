@@ -17,39 +17,15 @@ class SalesController extends Controller
      */
     public function index(Request $request)
     {
-        try{
-
+        try {
             $productId = $request->input('product_id');
-            
-        
-            $product = Product::findOrFail($productId);
-         
-            if($product->stock <= 0){
-                return response()->json(['error' => '在庫はありません'],400);
-            }
-
-        
-
-        $sale = new Sale();
-        $sale->product_id =$productId;
-        $sale->save();
-
-        $product->decrement('stock');
-
-
-        return response()->json(['massage' => '購入が完了しました'],200);
-            }catch(\Exception $e){
-            return response()->json(['error' => '購入処理に失敗しました'],500);
-         }
+            Sale::purchase($productId);
+            return response()->json(['message' => '購入が完了しました'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+ 
     }
-
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         //
